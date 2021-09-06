@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import "./chitra.css";
 import {
   getCanvasImageFromFile,
   loadImageToCanvas,
@@ -25,14 +26,38 @@ export default function Chitra() {
     });
   };
   const buttonClicked = (evt) => {
-    console.log(evt.target.value);
     setAppState(evt.target.value);
+    document.getElementById("canvasEffect").value = evt.target.value;
   };
+
+  const saveCanvas = () => {
+    console.log("saving canvas ...");
+    const canvas = document.getElementById("myCanvas");
+    const image = canvas
+      .toDataURL("image/jpeg")
+      .replace("image/jpeg", "image/octet-stream"); // here is the most important part because if you dont replace you will get a DOM 18 exception.
+
+    // window.open(image, "_blank", "image.jpg"); // it will save locally
+    // create temporary link
+    var tmpLink = document.createElement("a");
+    tmpLink.download =
+      appState +
+      "-" +
+      new Date().toLocaleString().replace(/ |:|,|\//g, "_") +
+      "-image.jpg"; // set the name of the download file
+    tmpLink.href = image;
+
+    // temporarily add link to body and initiate the download
+    document.body.appendChild(tmpLink);
+    tmpLink.click();
+    document.body.removeChild(tmpLink);
+  };
+
   const renderEffectsButtons = () => {
     return (
       <div>
         <select name="effects" onChange={buttonClicked} id="canvasEffect">
-          <option value="reset">--Please choose an effect--</option>
+          <option value="reset">Please choose an effect</option>
           <option value="grayscale">grayscale</option>
           <option value="dotted">dotted</option>
           <option value="invert">invert</option>
@@ -41,6 +66,10 @@ export default function Chitra() {
         &nbsp;
         <button value="reset" onClick={buttonClicked}>
           reset
+        </button>
+        &nbsp;
+        <button value="save" onClick={saveCanvas}>
+          save to device
         </button>
       </div>
     );
