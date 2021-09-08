@@ -41,32 +41,33 @@ export const loadImageToCanvas = (imageData) => {
   return <Canvas draw={draw} />;
 };
 
-export const convertToEffect = (effect) => {
+export const convertToEffect = (effect, range) => {
   const draw = (context, canvas) => {
     console.log(
-      "context.width, context.height, canvas.width, canvas.height",
-      context.width,
-      context.height,
+      "resolution:",
       canvas.width,
-      canvas.height
+      "x",
+      canvas.height,
+      " range = ",
+      range
     );
     var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
 
     let newData = null;
     switch (effect) {
       case "grayscale":
-        newData = toGrayscale(imageData);
+        newData = toGrayscale(imageData, range);
         break;
 
       case "dotted":
-        newData = toPixels(imageData);
+        newData = toPixels(imageData, range);
         break;
 
       case "invert":
-        newData = invert(imageData);
+        newData = invert(imageData, range);
         break;
       case "special":
-        newData = special(imageData);
+        newData = special(imageData, range);
         break;
 
       default:
@@ -77,11 +78,10 @@ export const convertToEffect = (effect) => {
   return <Canvas draw={draw} />;
 };
 
-var toGrayscale = function (imageData) {
+var toGrayscale = function (imageData, range) {
   const data = imageData.data;
-  console.log("data.length = ", data.length);
   for (var i = 0; i < data.length; i += 4) {
-    const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+    const avg = (data[i] + data[i + 1] + data[i + 2]) / 3 + range / 25;
     data[i] = avg; // red
     data[i + 1] = avg; // green
     data[i + 2] = avg; // blue
@@ -89,11 +89,12 @@ var toGrayscale = function (imageData) {
   return imageData;
 };
 
-var special = function (imageData) {
+var special = function (imageData, range) {
   const data = imageData.data;
-  console.log("data.length = ", data.length);
   for (var i = 0; i < data.length; i += 4) {
-    const avg = Math.max.apply(Math, [data[i], data[i + 1], data[i + 2]]);
+    const pxArray = [data[i], data[i + 1], data[i + 2]];
+    const avg =
+      range > 0 ? Math.max.apply(Math, pxArray) : Math.min.apply(Math, pxArray);
     data[i] = avg; // red
     data[i + 1] = avg; // green
     data[i + 2] = avg; // blue
@@ -103,7 +104,6 @@ var special = function (imageData) {
 
 var toPixels = function (imageData) {
   const data = imageData.data;
-  console.log("data.length = ", data.length);
   for (var i = 0; i < data.length; i += 4) {
     const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
     data[i] = filterHigherPixel(data[i], avg); // red
@@ -115,7 +115,6 @@ var toPixels = function (imageData) {
 
 var invert = function (imageData) {
   const data = imageData.data;
-  console.log("data.length = ", data.length);
   for (var i = 0; i < data.length; i += 4) {
     data[i] = 255 - data[i]; // red
     data[i + 1] = 255 - data[i + 1]; // green

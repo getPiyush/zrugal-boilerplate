@@ -9,6 +9,7 @@ import {
 export default function Chitra() {
   const [appState, setAppState] = useState("init");
   const [imageFile, setImageFile] = useState(null);
+  const [range, setRange] = useState(1);
   const [canvas, setCanvas] = useState(null);
 
   useEffect(() => {
@@ -27,7 +28,12 @@ export default function Chitra() {
   };
   const buttonClicked = (evt) => {
     setAppState(evt.target.value);
+    setRange(1);
     document.getElementById("canvasEffect").value = evt.target.value;
+  };
+
+  const rangeUpdated = (evt) => {
+    setRange(parseInt(evt.target.value, 10));
   };
 
   const saveCanvas = () => {
@@ -71,6 +77,17 @@ export default function Chitra() {
         <button value="save" onClick={saveCanvas}>
           save to device
         </button>
+        <br />
+        <input
+          type="range"
+          onInput={rangeUpdated}
+          value={range}
+          min="-50"
+          max="50"
+          step="1"
+          width="100wh"
+        />{" "}
+        {range}
       </div>
     );
   };
@@ -102,7 +119,7 @@ export default function Chitra() {
           <div>
             {renderEffectsButtons()}
             <br />
-            {convertToEffect(appState)}
+            {convertToEffect(appState, range)}
           </div>
         );
 
